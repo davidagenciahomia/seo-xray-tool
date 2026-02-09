@@ -620,6 +620,41 @@ def calcular_gap_analysis(data_list, keyword):
         }
     }
 
+def realizar_clustering(data_list):
+    """Agrupa URLs por similitud semántica"""
+    if len(data_list) < 3:
+        return None
+    
+    corpus = []
+    urls = []
+    for item in data_list:
+        h2_list = item.get('H2_list', item.get('h2', []))
+        words = item.get('all_words', [])
+        text = " ".join(h2_list) + " " + " ".join(words[:100])
+        corpus.append(text)
+        urls.append(item.get('URL', ''))
+    
+    try:
+        vectorizer = TfidfVectorizer(max_features=50, stop_words=list(STOPWORDS))
+        X = vectorizer.fit_transform(corpus)
+        
+        n_clusters = min(3, len(data_list))
+        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+        clusters = kmeans.fit_predict(X)
+        
+        cluster_groups = {}
+        for idx, cluster_id in enumerate(clusters):
+            if cluster_id not in cluster_groups:
+                cluster_groups[cluster_id] = []
+            cluster_groups[cluster_id].append({
+                "url": urls[idx],
+                "title": data_list[idx].get('Título', data_list[idx].get('title', 'N/A'))
+            })
+        
+        return cluster_groups
+    except:
+        return None
+
 # ==========================================
 # 🎨 SIDEBAR
 # ==========================================
@@ -707,6 +742,7 @@ if analyze_button and keyword:
                 st.session_state.data_seo = final_data
                 st.session_state.global_words = global_words
                 st.session_state.gap_analysis = calcular_gap_analysis(final_data, keyword)
+                st.session_state.clusters = realizar_clustering(final_data)
                 status.update(label="✅ Completado", state="complete")
                 st.balloons()
 
@@ -717,10 +753,12 @@ if st.session_state.data_seo:
     data = st.session_state.data_seo
     df = pd.DataFrame(data)
     
-    tab1, tab2, tab3 = st.tabs([
+    tab1, tab2, tab3, tab4, tab5 = st.tabs([
         "📊 Overview (Con Guía)", 
-        "🎯 Gap Analysis (Qué Hacer)", 
-        "📋 Detalle Competidores"
+        "🎯 Gap Analysis (Qué Hacer)",
+        "🧬 Topic Clustering",
+        "📋 Detalle Competidores",
+        "💾 Exportar Datos"
     ])
     
     with tab1:
@@ -821,6 +859,80 @@ if st.session_state.data_seo:
                 st.info("No hay H2s que se repitan consistentemente (cada competidor usa estructura diferente)")
     
     with tab3:
+        st.markdown("### 🧬 Topic Clustering: Grupos Temáticos")
+        
+        if st.session_state.show_help:
+            st.markdown("""
+            <div class="explainer-box">
+                <strong>💡 ¿Qué es el Topic Clustering?</strong><br>
+                La herramienta agrupa automáticamente los competidores según la <strong>similitud de su contenido</strong>.<br><br>
+                <strong>¿Para qué sirve?</strong><br>
+                • Si hay 3 clusters, significa que hay 3 formas DIFERENTES de abordar el tema<br>
+                • El cluster con MÁS URLs es el enfoque dominante que prefiere Google<br>
+                • Puedes elegir: competir en UN cluster o crear contenido que cubra TODOS<br><br>
+                <strong>💡 Tip Pro:</strong> Si creas contenido que combina ideas de múltiples clusters, tienes más chances de rankear.
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Calcular clustering si no existe
+        if not st.session_state.clusters and len(data) >= 3:
+            with st.spinner("🔄 Calculando clusters semánticos..."):
+                st.session_state.clusters = realizar_clustering(data)
+        
+        if st.session_state.clusters:
+            clusters = st.session_state.clusters
+            
+            st.success(f"✅ Se identificaron **{len(clusters)} grupos temáticos** distintos")
+            
+            # Mostrar cada cluster
+            for cluster_id, urls in clusters.items():
+                cluster_num = cluster_id + 1
+                
+                with st.expander(f"📦 Cluster {cluster_num} ({len(urls)} competidores)", expanded=True):
+                    
+                    if st.session_state.show_help:
+                        if len(urls) >= len(data) * 0.5:
+                            st.info(f"🎯 **Este es el cluster DOMINANTE** ({len(urls)} de {len(data)} competidores). Google prefiere este enfoque.")
+                        else:
+                            st.caption(f"📌 Cluster minoritario con {len(urls)} competidores")
+                    
+                    for item in urls:
+                        # Buscar posición del competidor
+                        pos = next((d['Pos'] for d in data if d.get('URL') == item['url']), '?')
+                        st.markdown(f"**#{pos}** • [{item['title'][:80]}...]({item['url']})")
+            
+            # Recomendaciones
+            st.markdown("---")
+            st.markdown("#### 💡 ¿Qué hacer con esta información?")
+            
+            dominant_cluster = max(clusters.items(), key=lambda x: len(x[1]))
+            dominant_count = len(dominant_cluster[1])
+            
+            if dominant_count >= len(data) * 0.6:
+                st.success(f"""
+                **Estrategia Recomendada: SEGUIR AL LÍDER**
+                
+                El Cluster {dominant_cluster[0] + 1} tiene {dominant_count} de {len(data)} competidores. Este es el enfoque que Google prefiere.
+                
+                ✅ **Acción:** Analiza las URLs de este cluster y replica su estructura y enfoque temático.
+                """)
+            else:
+                st.info(f"""
+                **Estrategia Recomendada: CONTENIDO HÍBRIDO**
+                
+                No hay un cluster claramente dominante. Los competidores abordan el tema desde diferentes ángulos.
+                
+                ✅ **Acción:** Crea contenido que combine elementos de TODOS los clusters para ser más completo que cualquier competidor individual.
+                """)
+        
+        elif len(data) < 3:
+            st.warning("⚠️ Se necesitan al menos 3 competidores analizados para hacer clustering.")
+        else:
+            if st.button("🧬 Calcular Clustering Ahora"):
+                st.session_state.clusters = realizar_clustering(data)
+                st.rerun()
+    
+    with tab4:
         st.markdown("### 📋 Análisis Detallado de Cada Competidor")
         
         for item in data:
@@ -882,6 +994,204 @@ if st.session_state.data_seo:
                 schemas = item.get('Schemas', item.get('schemas', []))
                 if schemas:
                     st.markdown(f"#### 🏗️ Schemas: {', '.join(schemas)}")
+    
+    with tab5:
+        st.markdown("### 💾 Exportar Análisis Completo")
+        
+        if st.session_state.show_help:
+            st.markdown("""
+            <div class="explainer-box">
+                <strong>💡 ¿Para qué exportar?</strong><br>
+                • <strong>CSV:</strong> Abre en Excel para análisis más profundo, gráficos personalizados, o compartir con tu equipo<br>
+                • <strong>Gap Analysis TXT:</strong> Copia-pega directo a tu documento de estrategia de contenido<br>
+                • <strong>Checklist PDF:</strong> Imprime y úsala como guía mientras escribes tu artículo<br><br>
+                <strong>💡 Tip:</strong> Guarda estos archivos con la fecha para comparar cómo evoluciona la competencia cada mes.
+            </div>
+            """, unsafe_allow_html=True)
+        
+        st.markdown("---")
+        
+        # EXPORTAR CSV COMPLETO
+        st.markdown("#### 📊 Exportar Análisis Completo (CSV)")
+        st.caption("Incluye: Posición, URL, Title, Meta, Palabras, Intención, DA, Enlaces, etc.")
+        
+        # Preparar DataFrame para exportar
+        export_cols = ['Pos', 'URL', 'Título', 'Meta Desc', 'Palabras', 'Menciones KW', 
+                      'Intención', 'DA_Proxy', 'Readability']
+        
+        export_df = df[export_cols].copy()
+        
+        # Agregar columnas calculadas
+        export_df['Enlaces_Internos'] = df.apply(
+            lambda x: x.get('Enlaces', x.get('enlaces', {})).get('internal', 0) 
+            if isinstance(x.get('Enlaces', x.get('enlaces', {})), dict) else 0, 
+            axis=1
+        )
+        export_df['Enlaces_Externos'] = df.apply(
+            lambda x: x.get('Enlaces', x.get('enlaces', {})).get('external', 0) 
+            if isinstance(x.get('Enlaces', x.get('enlaces', {})), dict) else 0, 
+            axis=1
+        )
+        export_df['Imagenes'] = df.apply(
+            lambda x: x.get('Media', x.get('media', {})).get('images', 0) 
+            if isinstance(x.get('Media', x.get('media', {})), dict) else 0, 
+            axis=1
+        )
+        export_df['Videos'] = df.apply(
+            lambda x: x.get('Media', x.get('media', {})).get('videos', 0) 
+            if isinstance(x.get('Media', x.get('media', {})), dict) else 0, 
+            axis=1
+        )
+        export_df['Schemas'] = df.apply(
+            lambda x: ', '.join(x.get('Schemas', x.get('schemas', []))) 
+            if x.get('Schemas', x.get('schemas', [])) else 'None', 
+            axis=1
+        )
+        export_df['Num_H2s'] = df.apply(
+            lambda x: len(x.get('H2_list', x.get('h2', []))), 
+            axis=1
+        )
+        
+        # Vista previa
+        st.dataframe(export_df.head(), use_container_width=True)
+        
+        csv = export_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            "📥 Descargar Análisis Completo (CSV)",
+            csv,
+            f"SERP_Analysis_{keyword.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.csv",
+            "text/csv",
+            type="primary",
+            use_container_width=True
+        )
+        
+        st.markdown("---")
+        
+        # EXPORTAR GAP ANALYSIS
+        st.markdown("#### 🎯 Exportar Gap Analysis (TXT)")
+        st.caption("Lista completa de H2s críticos y palabras clave para tu contenido")
+        
+        if st.session_state.gap_analysis:
+            gap = st.session_state.gap_analysis
+            bench = gap['coverage_benchmark']
+            
+            gap_text = f"""
+========================================
+SERP X-RAY 360™ - GAP ANALYSIS REPORT
+========================================
+Keyword: {keyword}
+Fecha: {datetime.now().strftime('%Y-%m-%d %H:%M')}
+Competidores analizados: {len(data)}
+
+========================================
+📊 BENCHMARKS OBLIGATORIOS
+========================================
+• Palabras mínimas: {int(bench['word_avg'] * 1.2)} palabras (promedio: {int(bench['word_avg'])})
+• H2s recomendados: {int(bench['h2_avg'])} secciones
+• Enlaces internos: {int(bench['internal_links_avg'])} links
+• Enlaces externos: {int(bench['external_links_avg'])} links
+• Imágenes/Videos: {int(bench['media_avg'])} elementos multimedia
+
+========================================
+🔴 H2S CRÍTICOS (Secciones Obligatorias)
+========================================
+Estas secciones aparecen en +50% de competidores.
+DEBES incluirlas en tu artículo:
+
+"""
+            if gap['h2s_criticos']:
+                for h2, count in sorted(gap['h2s_criticos'].items(), key=lambda x: x[1], reverse=True):
+                    gap_text += f"• {h2.title()} (aparece en {count} competidores)\n"
+            else:
+                gap_text += "• Sin H2s consistentes (cada competidor usa estructura diferente)\n"
+            
+            gap_text += f"""
+
+========================================
+📝 PALABRAS CLAVE SECUNDARIAS (Top 30)
+========================================
+Incluye estas palabras de forma natural en tu texto:
+
+"""
+            for word, count in gap['palabras_clave_secundarias'][:30]:
+                gap_text += f"• {word} ({count} menciones)\n"
+            
+            gap_text += f"""
+
+========================================
+✅ CHECKLIST DE CONTENIDO
+========================================
+Antes de publicar, verifica:
+
+[ ] Artículo tiene +{int(bench['word_avg'] * 1.2)} palabras
+[ ] Incluye TODOS los H2s críticos listados arriba
+[ ] Tiene {int(bench['h2_avg'])}+ secciones H2
+[ ] Contiene {int(bench['internal_links_avg'])}+ enlaces internos
+[ ] Cita {int(bench['external_links_avg'])}+ fuentes externas de autoridad
+[ ] Incluye {int(bench['media_avg'])}+ imágenes (todas con ALT text)
+[ ] Title tag tiene 50-60 caracteres
+[ ] Meta description tiene 150-160 caracteres
+[ ] Keyword principal en: Title, Meta, H1, URL
+[ ] Usa las palabras clave secundarias del listado
+[ ] Responde las preguntas frecuentes del sector
+[ ] Tiene Schema Markup (mínimo: Article)
+
+========================================
+🎯 ESTRATEGIA RECOMENDADA
+========================================
+"""
+            if bench['word_avg'] > 2000:
+                gap_text += "• Keyword COMPETITIVA: Necesitas contenido excepcional (+2500 palabras)\n"
+            else:
+                gap_text += "• Keyword MODERADA: Contenido sólido puede rankear (1800-2200 palabras)\n"
+            
+            gap_text += f"""• Supera el promedio en TODAS las métricas en un 20%
+• Cubre TODOS los H2s críticos identificados
+• Agrega valor único que los competidores NO tienen
+
+========================================
+Generado por SERP X-RAY 360™ PRO
+========================================
+"""
+            
+            st.text_area("Vista previa:", gap_text, height=300)
+            
+            st.download_button(
+                "📥 Descargar Gap Analysis (TXT)",
+                gap_text.encode('utf-8'),
+                f"Gap_Analysis_{keyword.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d')}.txt",
+                "text/plain",
+                use_container_width=True
+            )
+        
+        st.markdown("---")
+        
+        # ESTADÍSTICAS DEL ANÁLISIS
+        st.markdown("#### 📈 Estadísticas del Análisis")
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric("🌐 URLs Analizadas", len(data))
+            st.metric("📝 Total Palabras", f"{df['Palabras'].sum():,}")
+        
+        with col2:
+            st.metric("📑 Total H2s Extraídos", sum([len(item.get('H2_list', item.get('h2', []))) for item in data]))
+            total_schemas = sum([len(item.get('Schemas', item.get('schemas', []))) for item in data])
+            st.metric("🏗️ Schemas Detectados", total_schemas)
+        
+        with col3:
+            avg_da = int(df['DA_Proxy'].mean())
+            if avg_da >= 60:
+                st.metric("⚠️ Dificultad", "ALTA", delta=f"DA {avg_da}")
+            elif avg_da >= 40:
+                st.metric("📊 Dificultad", "MEDIA", delta=f"DA {avg_da}")
+            else:
+                st.metric("✅ Dificultad", "BAJA", delta=f"DA {avg_da}")
+            
+            st.caption(f"Análisis realizado: {datetime.now().strftime('%Y-%m-%d %H:%M')}")
+        
+        st.success("✅ Todos tus datos están listos para exportar. Guárdalos para análisis futuros o comparte con tu equipo.")
 
 # ==========================================
 # 🎯 FOOTER
