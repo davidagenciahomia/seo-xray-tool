@@ -588,7 +588,8 @@ def analyze_url_final(url, target_kw, snippet_serp):
 def calcular_gap_analysis(data_list, keyword):
     all_h2s = []
     for item in data_list:
-        all_h2s.extend(item.get('h2', []))
+        h2_list = item.get('H2_list', item.get('h2', []))
+        all_h2s.extend(h2_list)
     h2_counter = Counter([h.lower() for h in all_h2s])
     threshold = len(data_list) * 0.5
     h2s_comunes = {h: count for h, count in h2_counter.items() if count >= threshold}
@@ -598,15 +599,24 @@ def calcular_gap_analysis(data_list, keyword):
         all_words.extend(item.get('all_words', []))
     word_counter = Counter(all_words)
     
+    # Calcular promedios con manejo seguro de diccionarios
+    def safe_get_enlaces(item, key):
+        enlaces = item.get('Enlaces', item.get('enlaces', {}))
+        return enlaces.get(key, 0) if isinstance(enlaces, dict) else 0
+    
+    def safe_get_media(item, key):
+        media = item.get('Media', item.get('media', {}))
+        return media.get(key, 0) if isinstance(media, dict) else 0
+    
     return {
         "h2s_criticos": h2s_comunes,
         "palabras_clave_secundarias": word_counter.most_common(30),
         "coverage_benchmark": {
-            "h2_avg": np.mean([len(item.get('h2', [])) for item in data_list]),
-            "word_avg": np.mean([item.get('word_count', 0) for item in data_list]),
-            "media_avg": np.mean([item.get('media', {}).get('total', 0) for item in data_list]),
-            "internal_links_avg": np.mean([item.get('enlaces', {}).get('internal', 0) for item in data_list]),
-            "external_links_avg": np.mean([item.get('enlaces', {}).get('external', 0) for item in data_list])
+            "h2_avg": np.mean([len(item.get('H2_list', item.get('h2', []))) for item in data_list]),
+            "word_avg": np.mean([item.get('Palabras', item.get('word_count', 0)) for item in data_list]),
+            "media_avg": np.mean([safe_get_media(item, 'total') for item in data_list]),
+            "internal_links_avg": np.mean([safe_get_enlaces(item, 'internal') for item in data_list]),
+            "external_links_avg": np.mean([safe_get_enlaces(item, 'external') for item in data_list])
         }
     }
 
@@ -675,7 +685,19 @@ if analyze_button and keyword:
                         "Pos": count_valid + 1,
                         "URL": url,
                         "Título": data['title'],
+                        "Meta Desc": data['meta_desc'],
                         "Palabras": data['word_count'],
+                        "Intención": data['intencion'],
+                        "Menciones KW": data['kw_density'],
+                        "H1_list": data.get('h1', []),
+                        "H2_list": data.get('h2', []),
+                        "Contenido": data.get('full_text', '')[:1000],
+                        "Enlaces": data.get('enlaces', {}),
+                        "SEO_Onpage": data.get('seo_onpage', {}),
+                        "Schemas": data.get('schemas', []),
+                        "Media": data.get('media', {}),
+                        "Readability": data.get('readability', 'N/A'),
+                        "DA_Proxy": data.get('da_proxy', 0),
                         **data
                     })
                     count_valid += 1
@@ -717,13 +739,13 @@ if st.session_state.data_seo:
         
         c2.metric("🎯 Intención", df['Intención'].mode()[0] if not df['Intención'].empty else "N/A")
         
-        internal_avg = int(df.apply(lambda x: x.get('enlaces', {}).get('internal', 0), axis=1).mean())
+        internal_avg = int(df.apply(lambda x: x.get('Enlaces', x.get('enlaces', {})).get('internal', 0) if isinstance(x.get('Enlaces', x.get('enlaces', {})), dict) else 0, axis=1).mean())
         c3.metric("🔗 Links Internos", internal_avg)
         if st.session_state.show_help:
             with c3:
                 show_explainer("internal_links")
         
-        media_avg = df.apply(lambda x: x.get('media', {}).get('total', 0), axis=1).mean()
+        media_avg = df.apply(lambda x: x.get('Media', x.get('media', {})).get('total', 0) if isinstance(x.get('Media', x.get('media', {})), dict) else 0, axis=1).mean()
         c4.metric("🖼️ Imágenes/Videos", f"{media_avg:.1f}")
         if st.session_state.show_help:
             with c4:
@@ -831,7 +853,7 @@ if st.session_state.data_seo:
                     st.markdown(f"**Imágenes con ALT:** {media.get('images_with_alt', 0)}")
                 
                 # SEO On-Page
-                seo = item.get('seo_onpage', {})
+                seo = item.get('SEO_Onpage', item.get('seo_onpage', {}))
                 if seo:
                     st.markdown("#### ✅ SEO On-Page")
                     
@@ -850,14 +872,16 @@ if st.session_state.data_seo:
                     st.markdown(f"**Longitud Meta:** {seo.get('meta_length', 0)} caracteres")
                 
                 # H2s
-                if item.get('h2'):
+                h2_list = item.get('H2_list', item.get('h2', []))
+                if h2_list:
                     st.markdown("#### 📑 Estructura H2")
-                    for h2 in item['h2'][:10]:
+                    for h2 in h2_list[:10]:
                         st.markdown(f"• {h2}")
                 
                 # Schemas
-                if item.get('schemas'):
-                    st.markdown(f"#### 🏗️ Schemas: {', '.join(item['schemas'])}")
+                schemas = item.get('Schemas', item.get('schemas', []))
+                if schemas:
+                    st.markdown(f"#### 🏗️ Schemas: {', '.join(schemas)}")
 
 # ==========================================
 # 🎯 FOOTER
