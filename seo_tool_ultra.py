@@ -797,5 +797,5 @@ if st.session_state.data_seo:
 # 🎯 FOOTER
 # ==========================================
 st.divider()
-st.caption("🚀 SERP X-RAY 360™ ULTRA - Versión 12.0 | Powered by Agency OS")
+st.caption("🚀 SERP X-RAY 360™ ULTRA - Versión 12.0 | Powered by Agencia Homia")
 st.caption("Módulos activos: Gap Analysis, Clustering, Schema Detection, Media Analysis, Readability, NER, DA Proxy, TOC Detection")
