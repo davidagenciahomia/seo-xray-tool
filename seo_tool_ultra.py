@@ -18,15 +18,293 @@ from urllib.parse import urlparse
 # 🔧 CONFIGURACIÓN INICIAL
 # ==========================================
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-st.set_page_config(page_title="SERP X-RAY 360™ ULTRA", layout="wide", page_icon="🚀")
+st.set_page_config(
+    page_title="SERP X-RAY 360™ PRO", 
+    layout="wide", 
+    page_icon="🎯",
+    initial_sidebar_state="expanded"
+)
+
+# ==========================================
+# 🎨 CSS PERSONALIZADO - DISEÑO PROFESIONAL
+# ==========================================
+st.markdown("""
+<style>
+    /* Importar fuente profesional */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    
+    /* Variables de color profesionales */
+    :root {
+        --primary: #6366f1;
+        --primary-dark: #4f46e5;
+        --secondary: #8b5cf6;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --danger: #ef4444;
+        --dark: #0f172a;
+        --dark-light: #1e293b;
+        --text: #f1f5f9;
+        --text-muted: #94a3b8;
+    }
+    
+    /* Fondo general */
+    .stApp {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Sidebar profesional */
+    [data-testid="stSidebar"] {
+        background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        border-right: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    
+    [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+        color: var(--text);
+    }
+    
+    /* Títulos principales */
+    h1 {
+        font-weight: 800 !important;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 2.5rem !important;
+        margin-bottom: 1rem !important;
+        letter-spacing: -0.02em;
+    }
+    
+    h2 {
+        color: var(--text) !important;
+        font-weight: 700 !important;
+        font-size: 1.75rem !important;
+        margin-top: 2rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    h3 {
+        color: var(--text) !important;
+        font-weight: 600 !important;
+        font-size: 1.25rem !important;
+    }
+    
+    /* Métricas (cards superiores) */
+    [data-testid="stMetric"] {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        backdrop-filter: blur(10px);
+    }
+    
+    [data-testid="stMetric"] label {
+        color: var(--text-muted) !important;
+        font-size: 0.875rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    [data-testid="stMetric"] [data-testid="stMetricValue"] {
+        color: var(--text) !important;
+        font-size: 2rem !important;
+        font-weight: 700 !important;
+    }
+    
+    /* Tabs profesionales */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background: rgba(30, 41, 59, 0.5);
+        padding: 0.5rem;
+        border-radius: 12px;
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        height: 50px;
+        padding: 0 24px;
+        background: transparent;
+        border-radius: 8px;
+        color: var(--text-muted);
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--text);
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    
+    /* Botones premium */
+    .stButton button {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 1rem;
+        letter-spacing: 0.02em;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        text-transform: uppercase;
+    }
+    
+    .stButton button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(99, 102, 241, 0.4);
+    }
+    
+    /* Expanders profesionales */
+    .streamlit-expanderHeader {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        font-weight: 600;
+        color: var(--text);
+        transition: all 0.3s ease;
+    }
+    
+    .streamlit-expanderHeader:hover {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+        border-color: rgba(99, 102, 241, 0.4);
+    }
+    
+    .streamlit-expanderContent {
+        background: rgba(30, 41, 59, 0.5);
+        border: 1px solid rgba(99, 102, 241, 0.1);
+        border-radius: 0 0 10px 10px;
+        padding: 1.5rem;
+    }
+    
+    /* DataFrames */
+    .dataframe {
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .dataframe thead tr th {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%) !important;
+        color: white !important;
+        font-weight: 700 !important;
+        padding: 1rem !important;
+        border: none !important;
+    }
+    
+    .dataframe tbody tr {
+        background: rgba(30, 41, 59, 0.5) !important;
+        transition: all 0.2s ease;
+    }
+    
+    .dataframe tbody tr:hover {
+        background: rgba(99, 102, 241, 0.1) !important;
+    }
+    
+    /* Info/Success/Warning boxes */
+    .stAlert {
+        border-radius: 10px;
+        border: 1px solid;
+        padding: 1rem 1.5rem;
+        backdrop-filter: blur(10px);
+    }
+    
+    [data-baseweb="notification"] {
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+    }
+    
+    /* Inputs */
+    .stTextInput input, .stSelectbox select, .stSlider {
+        background: rgba(30, 41, 59, 0.5) !important;
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border-radius: 8px !important;
+        color: var(--text) !important;
+        padding: 0.75rem !important;
+    }
+    
+    .stTextInput input:focus, .stSelectbox select:focus {
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+    }
+    
+    /* Progress bar */
+    .stProgress > div > div {
+        background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+        border-radius: 10px;
+    }
+    
+    /* Dividers elegantes */
+    hr {
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, rgba(99, 102, 241, 0.3) 50%, transparent 100%);
+        margin: 2rem 0;
+    }
+    
+    /* Status container */
+    [data-testid="stStatus"] {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+    }
+    
+    /* Code blocks */
+    code {
+        background: rgba(30, 41, 59, 0.8) !important;
+        border: 1px solid rgba(99, 102, 241, 0.2) !important;
+        border-radius: 6px !important;
+        padding: 0.25rem 0.5rem !important;
+        color: #a5b4fc !important;
+    }
+    
+    /* Charts */
+    .stPlotlyChart {
+        border-radius: 12px;
+        padding: 1rem;
+        background: rgba(30, 41, 59, 0.3);
+        border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    
+    /* Scrollbar personalizado */
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(15, 23, 42, 0.5);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        border-radius: 5px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-dark);
+    }
+    
+    /* Animaciones suaves */
+    * {
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+</style>
+""", unsafe_allow_html=True)
 
 # ==========================================
 # 🔑 API KEYS
 # ==========================================
 SERPER_API_KEY = st.secrets.get("SERPER_API_KEY", "cb2f958314203c51f8835f854b6a5038df46fb11")
-MOZ_ACCESS_ID = "TU_MOZ_ACCESS_ID"  # Opcional - para Domain Authority
-MOZ_SECRET_KEY = "TU_MOZ_SECRET_KEY"  # Opcional
-PAGESPEED_API_KEY = "TU_PAGESPEED_KEY"  # Opcional - Google PageSpeed Insights
 
 # ==========================================
 # 📋 LISTAS DE FILTRADO
@@ -65,10 +343,9 @@ if 'gap_analysis' not in st.session_state: st.session_state.gap_analysis = None
 if 'clusters' not in st.session_state: st.session_state.clusters = None
 
 # ==========================================
-# 🔍 FUNCIÓN 1: BÚSQUEDA EN GOOGLE
+# 🔍 FUNCIONES CORE (SIN CAMBIOS)
 # ==========================================
 def get_serper_results(query, n_needed):
-    """Obtiene resultados orgánicos de Google"""
     url = "https://google.serper.dev/search"
     n_safe = min(n_needed, 100)
     payload = {"q": query, "num": n_safe, "gl": "es", "hl": "es"}
@@ -78,11 +355,7 @@ def get_serper_results(query, n_needed):
         return response.json().get('organic', [])
     except: return []
 
-# ==========================================
-# 🧹 FUNCIÓN 2: LIMPIEZA DE DATOS
-# ==========================================
 def clean_h2s(soup_h2s):
-    """Limpia encabezados H2"""
     valid_h2s = []
     for h in soup_h2s:
         text = h.get_text(" ", strip=True)
@@ -92,53 +365,35 @@ def clean_h2s(soup_h2s):
     return valid_h2s
 
 def get_ngrams(words, n):
-    """Genera n-gramas"""
     return [" ".join(words[i:i+n]) for i in range(len(words)-n+1)]
 
-# ==========================================
-# 🎯 FUNCIÓN 3: ANÁLISIS DE INTENCIÓN
-# ==========================================
 def detectar_intencion(soup, text):
-    """Clasifica intención: Transaccional, Informacional, Mixto"""
     text_lower = text.lower()
     title_lower = soup.title.string.lower() if soup.title else ""
-    
-    transaccional = ["precio", "comprar", "venta", "carrito", "oferta", "barato", "tienda", "envío", "stock", "€", "$", "pedir", "catálogo"]
-    informacional = ["guía", "tutorial", "opinión", "review", "qué es", "cómo", "cuándo", "consejos", "mejores", "comparativa", "análisis", "blog"]
-    
+    transaccional = ["precio", "comprar", "venta", "carrito", "oferta", "barato", "tienda", "envío", "stock", "€", "$"]
+    informacional = ["guía", "tutorial", "opinión", "review", "qué es", "cómo", "cuándo", "consejos", "mejores", "comparativa"]
     score_trans = sum(1 for w in transaccional if w in text_lower or w in title_lower)
     score_info = sum(1 for w in informacional if w in text_lower or w in title_lower)
-    
     if score_trans > score_info: return "🛒 Transaccional"
     if score_info > score_trans: return "📚 Informacional"
     return "⚖️ Mixto"
 
-# ==========================================
-# 📅 FUNCIÓN 4: EXTRACCIÓN DE FECHA
-# ==========================================
 def extraer_fecha(soup):
-    """Extrae fecha de publicación"""
     date = "N/A"
     meta_date = soup.find("meta", attrs={"property": "article:published_time"}) or \
-                soup.find("meta", attrs={"name": "date"}) or \
-                soup.find("meta", attrs={"name": "pubdate"})
+                soup.find("meta", attrs={"name": "date"})
     if meta_date:
         try: date = meta_date['content'][:10]
         except: pass
     return date
 
-# ==========================================
-# ❓ FUNCIÓN 5: EXTRACCIÓN DE FAQS
-# ==========================================
 def extraer_preguntas_validas(text):
-    """Extrae preguntas reales del contenido"""
     preguntas_raw = re.findall(r'[¿][^?]+[?]', text)
     if not preguntas_raw:
         patrones = [r'(?:qué|cómo|cuándo|dónde|por qué|cuánto)\s+\w+\s+\w+[^,.:;]+']
         for p in patrones:
             match = re.findall(p, text.lower(), re.IGNORECASE)
             preguntas_raw.extend(match)
-            
     preguntas_limpias = []
     for p in preguntas_raw:
         p_clean = p.strip().capitalize()
@@ -146,27 +401,17 @@ def extraer_preguntas_validas(text):
         if any(bad in p_clean.lower() for bad in FAQ_BLACKLIST): continue
         if not p_clean.endswith('?'): p_clean += '?'
         preguntas_limpias.append(p_clean)
-        
     return list(set(preguntas_limpias))[:5]
 
-# ==========================================
-# 🔗 FUNCIÓN 6: ANÁLISIS DE ENLACES INTERNOS
-# ==========================================
 def analizar_enlaces_internos(soup, url):
-    """Cuenta enlaces internos"""
     try:
         domain = urlparse(url).netloc
         links = soup.find_all('a', href=True)
         internal = [l for l in links if domain in l['href'] or l['href'].startswith('/')]
         return len(internal)
-    except:
-        return 0
+    except: return 0
 
-# ==========================================
-# 📊 FUNCIÓN 7: SCHEMA MARKUP DETECTION
-# ==========================================
 def detectar_schema_markup(soup):
-    """Detecta datos estructurados (JSON-LD)"""
     schemas = []
     scripts = soup.find_all('script', type='application/ld+json')
     for script in scripts:
@@ -181,78 +426,45 @@ def detectar_schema_markup(soup):
         except: pass
     return list(set(schemas))
 
-# ==========================================
-# 🖼️ FUNCIÓN 8: MEDIA RICHNESS
-# ==========================================
 def analizar_media_richness(soup):
-    """Cuenta elementos multimedia"""
     imagenes = len(soup.find_all('img'))
     videos = len(soup.find_all(['video', 'iframe']))
     return {"images": imagenes, "videos": videos, "total": imagenes + videos}
 
-# ==========================================
-# 📖 FUNCIÓN 9: READABILITY SCORE
-# ==========================================
 def calcular_readability(text):
-    """Calcula índice Flesch Reading Ease"""
     try:
         score = flesch_reading_ease(text)
         if score >= 80: return f"✅ Muy fácil ({score:.0f})"
         elif score >= 60: return f"👍 Fácil ({score:.0f})"
         elif score >= 40: return f"⚠️ Medio ({score:.0f})"
         else: return f"❌ Difícil ({score:.0f})"
-    except:
-        return "N/A"
+    except: return "N/A"
 
-# ==========================================
-# 🔍 FUNCIÓN 10: NER (ENTIDADES NOMBRADAS)
-# ==========================================
 def extraer_entidades(text):
-    """Extrae entidades nombradas (simplificado con regex)"""
-    # Patrón para nombres propios (palabras en mayúscula)
     entidades = re.findall(r'\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+(?:\s+[A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)*\b', text)
-    # Filtrar palabras comunes que empiezan con mayúscula
-    entidades_filtradas = [e for e in entidades if e.lower() not in ['el', 'la', 'los', 'las', 'un', 'una']]
+    entidades_filtradas = [e for e in entidades if e.lower() not in ['el', 'la', 'los', 'las']]
     return list(set(entidades_filtradas))[:10]
 
-# ==========================================
-# 🏆 FUNCIÓN 11: DOMAIN AUTHORITY (PROXY)
-# ==========================================
 def estimar_domain_authority(url):
-    """Estima DA basándose en TLD y características del dominio"""
     domain = urlparse(url).netloc
-    score = 50  # Base
-    
-    # Bonificación por TLD premium
+    score = 50
     if domain.endswith('.edu'): score += 20
     elif domain.endswith('.gov'): score += 25
     elif domain.endswith('.org'): score += 10
-    
-    # Penalización por subdominios
     if domain.count('.') > 1: score -= 10
-    
-    # Bonificación por dominio corto
     if len(domain) < 15: score += 5
-    
     return min(max(score, 0), 100)
 
-# ==========================================
-# 📊 FUNCIÓN 12: ANÁLISIS DE URL COMPLETO
-# ==========================================
 def analyze_url_final(url, target_kw, snippet_serp):
-    """Análisis completo de una URL"""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
     }
-    
     try:
-        # Extracción con Trafilatura
         downloaded = trafilatura.fetch_url(url)
         main_text = None
         if downloaded:
             main_text = trafilatura.extract(downloaded, include_comments=False, include_tables=False)
-        
         soup = None
         if not main_text:
             res = requests.get(url, timeout=12, headers=headers, verify=False)
@@ -262,90 +474,54 @@ def analyze_url_final(url, target_kw, snippet_serp):
             main_text = soup.get_text(separator=' ', strip=True)
         else:
             soup = BeautifulSoup(downloaded, 'html.parser')
-
         if len(main_text) < 100: return {"error": "Contenido insuficiente"}
-
         title = soup.title.string.strip() if soup.title else "N/A"
         if title == "N/A" or len(title) < 3: return {"error": "Título no detectado"}
-
         meta_tag = soup.find("meta", attrs={"name": "description"})
         meta_desc = meta_tag["content"] if meta_tag else snippet_serp
-
         h1s = [h.get_text(" ", strip=True) for h in soup.find_all('h1')]
         h2s_clean = clean_h2s(soup.find_all('h2'))
         h3s_clean = [h.get_text(" ", strip=True) for h in soup.find_all('h3')][:10]
-        
         clean_words = [w for w in re.sub(r'[^\w\s]', '', main_text.lower()).split() 
                       if w not in STOPWORDS and len(w) > 2]
-        
-        # NUEVOS ANÁLISIS
         enlaces_internos = analizar_enlaces_internos(soup, url)
         schemas = detectar_schema_markup(soup)
         media = analizar_media_richness(soup)
         readability = calcular_readability(main_text)
         entidades = extraer_entidades(main_text)
         da_proxy = estimar_domain_authority(url)
-        
-        # Detectar Table of Contents
         toc_detected = bool(soup.find('div', class_=re.compile('table.*content|toc', re.I)))
-        
         return {
-            "title": title,
-            "meta_desc": meta_desc,
-            "date": extraer_fecha(soup),
-            "h1": h1s,
-            "h2": h2s_clean,
-            "h3": h3s_clean,
+            "title": title, "meta_desc": meta_desc, "date": extraer_fecha(soup),
+            "h1": h1s, "h2": h2s_clean, "h3": h3s_clean,
             "word_count": len(main_text.split()),
             "kw_density": len(re.findall(rf'\b{re.escape(target_kw)}\b', main_text, re.IGNORECASE)),
-            "content_sample": main_text[:1000],
-            "all_words": clean_words,
+            "content_sample": main_text[:1000], "all_words": clean_words,
             "intencion": detectar_intencion(soup, main_text),
             "preguntas": extraer_preguntas_validas(main_text),
-            "enlaces_internos": enlaces_internos,
-            "schemas": schemas,
-            "media": media,
-            "readability": readability,
-            "entidades": entidades,
-            "da_proxy": da_proxy,
-            "toc": toc_detected,
-            "full_text": main_text
+            "enlaces_internos": enlaces_internos, "schemas": schemas,
+            "media": media, "readability": readability, "entidades": entidades,
+            "da_proxy": da_proxy, "toc": toc_detected, "full_text": main_text
         }
     except Exception as e:
         return {"error": str(e)}
 
-# ==========================================
-# 🎯 FUNCIÓN 13: GAP ANALYSIS
-# ==========================================
 def calcular_gap_analysis(data_list, keyword):
-    """Analiza brechas de contenido vs competencia"""
-    # Recopilar todos los H2s
     all_h2s = []
     for item in data_list:
         all_h2s.extend(item.get('h2', []))
-    
-    # Contar frecuencia de H2s
     h2_counter = Counter([h.lower() for h in all_h2s])
-    
-    # H2s que aparecen en >50% de competidores
     threshold = len(data_list) * 0.5
     h2s_comunes = {h: count for h, count in h2_counter.items() if count >= threshold}
-    
-    # Palabras clave secundarias más comunes
     all_words = []
     for item in data_list:
         all_words.extend(item.get('all_words', []))
-    
     word_counter = Counter(all_words)
     top_words = word_counter.most_common(30)
-    
-    # Preguntas más frecuentes
     all_faqs = []
     for item in data_list:
         all_faqs.extend(item.get('preguntas', []))
-    
     faq_counter = Counter([q.lower() for q in all_faqs])
-    
     return {
         "h2s_criticos": h2s_comunes,
         "palabras_clave_secundarias": top_words,
@@ -357,33 +533,20 @@ def calcular_gap_analysis(data_list, keyword):
         }
     }
 
-# ==========================================
-# 🔮 FUNCIÓN 14: TOPIC CLUSTERING
-# ==========================================
 def realizar_clustering(data_list):
-    """Agrupa URLs por similitud semántica"""
-    if len(data_list) < 3:
-        return None
-    
-    # Crear corpus de textos
+    if len(data_list) < 3: return None
     corpus = []
     urls = []
     for item in data_list:
         text = " ".join(item.get('h2', [])) + " " + " ".join(item.get('all_words', [])[:100])
         corpus.append(text)
         urls.append(item.get('URL', ''))
-    
-    # Vectorización TF-IDF
     try:
         vectorizer = TfidfVectorizer(max_features=50, stop_words=list(STOPWORDS))
         X = vectorizer.fit_transform(corpus)
-        
-        # K-Means clustering
         n_clusters = min(3, len(data_list))
         kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
         clusters = kmeans.fit_predict(X)
-        
-        # Organizar resultados
         cluster_groups = {}
         for idx, cluster_id in enumerate(clusters):
             if cluster_id not in cluster_groups:
@@ -392,56 +555,68 @@ def realizar_clustering(data_list):
                 "url": urls[idx],
                 "title": data_list[idx].get('title', 'N/A')
             })
-        
         return cluster_groups
-    except:
-        return None
+    except: return None
 
 # ==========================================
-# 🎨 INTERFAZ GRÁFICA
+# 🎨 SIDEBAR CON NUEVO DISEÑO
 # ==========================================
 with st.sidebar:
-    st.image("https://cdn-icons-png.flaticon.com/512/1066/1066373.png", width=50)
-    st.title("🚀 SERP X-RAY 360™")
-    st.caption("ULTRA Edition | v12.0")
-    st.divider()
+    st.markdown("""
+    <div style='text-align: center; padding: 2rem 0 1rem 0;'>
+        <div style='font-size: 3rem; margin-bottom: 0.5rem;'>🎯</div>
+        <h1 style='font-size: 1.75rem; margin: 0; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800;'>SERP X-RAY 360™</h1>
+        <p style='color: #94a3b8; font-size: 0.875rem; margin-top: 0.5rem; font-weight: 600;'>PROFESSIONAL EDITION</p>
+    </div>
+    """, unsafe_allow_html=True)
     
-    keyword = st.text_input("🎯 Keyword:", value="que es el repep")
-    num_target = st.slider("📊 Competidores:", 3, 10, 5)
+    st.markdown("---")
     
-    st.markdown("### ⚙️ Módulos Activos")
-    col1, col2 = st.columns(2)
-    with col1:
-        st.success("✅ Gap Analysis")
-        st.success("✅ Clustering")
-        st.success("✅ Schema Detection")
-        st.success("✅ Media Analysis")
-    with col2:
-        st.success("✅ Readability")
-        st.success("✅ NER Entities")
-        st.success("✅ DA Proxy")
-        st.success("✅ TOC Detection")
+    st.markdown("#### 🎯 Configuración de Análisis")
+    keyword = st.text_input("Keyword Principal:", value="que es el repep", help="Introduce la keyword que quieres analizar")
+    num_target = st.slider("Competidores a analizar:", 3, 10, 5, help="Más competidores = análisis más profundo")
     
-    st.divider()
-    debug_mode = st.checkbox("🛠️ Modo Debug", value=False)
-    analyze_button = st.button("🚀 ESCANEAR SERPS", type="primary", use_container_width=True)
+    st.markdown("---")
+    st.markdown("#### ⚙️ Opciones Avanzadas")
+    debug_mode = st.checkbox("🛠️ Modo Debug", value=False, help="Muestra errores detallados")
     
-    if st.button("🗑️ Limpiar Cache"):
+    st.markdown("---")
+    analyze_button = st.button("🚀 INICIAR ANÁLISIS", use_container_width=True, type="primary")
+    
+    if st.button("🗑️ Limpiar Caché", use_container_width=True):
         st.session_state.data_seo = None
         st.session_state.gap_analysis = None
         st.session_state.clusters = None
         st.rerun()
+    
+    st.markdown("---")
+    st.markdown("""
+    <div style='padding: 1rem; background: rgba(99, 102, 241, 0.1); border-radius: 10px; border: 1px solid rgba(99, 102, 241, 0.2);'>
+        <p style='color: #94a3b8; font-size: 0.75rem; margin: 0; text-align: center;'>
+            <strong>v12.0 PRO</strong><br>
+            Powered by SERP Intelligence
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
 
 # ==========================================
-# 🎯 LÓGICA PRINCIPAL
+# 🎯 HEADER PRINCIPAL
 # ==========================================
-st.title("🚀 SERP X-RAY 360™ ULTRA: Inteligencia SEO Competitiva")
+st.markdown("""
+<div style='text-align: center; padding: 2rem 0;'>
+    <h1 style='font-size: 3rem; margin-bottom: 0.5rem;'>🎯 SERP X-RAY 360™ PRO</h1>
+    <p style='color: #94a3b8; font-size: 1.25rem; font-weight: 600;'>Inteligencia Competitiva SEO de Nueva Generación</p>
+</div>
+""", unsafe_allow_html=True)
 
+# ==========================================
+# 🎯 LÓGICA PRINCIPAL DE EJECUCIÓN
+# ==========================================
 if analyze_button and keyword:
-    if "TU_API_KEY" in SERPER_API_KEY or len(SERPER_API_KEY) < 20:
-        st.error("⚠️ ERROR: Configura tu API Key de Serper en línea 17")
+    if len(SERPER_API_KEY) < 20:
+        st.error("⚠️ ERROR: Configura tu API Key de Serper")
     else:
-        with st.status("🔄 Escaneando SERPs...") as status:
+        with st.status("🔄 Analizando competidores...", expanded=True) as status:
             buffer_size = 40
             raw_results = get_serper_results(keyword, num_target + buffer_size)
             final_data = []
@@ -464,28 +639,16 @@ if analyze_button and keyword:
                     if data and "error" not in data:
                         global_words.extend(data['all_words'])
                         final_data.append({
-                            "Pos": count_valid + 1,
-                            "URL": url,
-                            "Título": data['title'],
-                            "Fecha": data['date'],
-                            "Meta Desc": data['meta_desc'],
-                            "Palabras": data['word_count'],
-                            "Menciones KW": data['kw_density'],
-                            "H1_list": data['h1'],
-                            "H2_list": data['h2'],
-                            "H3_list": data['h3'],
-                            "Contenido": data['content_sample'],
-                            "Intención": data['intencion'],
-                            "Preguntas": data['preguntas'],
-                            "Enlaces_Int": data['enlaces_internos'],
-                            "Schemas": data['schemas'],
-                            "Media": data['media'],
-                            "Readability": data['readability'],
-                            "Entidades": data['entidades'],
-                            "DA_Proxy": data['da_proxy'],
-                            "TOC": data['toc'],
-                            "full_text": data['full_text'],
-                            **data
+                            "Pos": count_valid + 1, "URL": url, "Título": data['title'],
+                            "Fecha": data['date'], "Meta Desc": data['meta_desc'],
+                            "Palabras": data['word_count'], "Menciones KW": data['kw_density'],
+                            "H1_list": data['h1'], "H2_list": data['h2'], "H3_list": data['h3'],
+                            "Contenido": data['content_sample'], "Intención": data['intencion'],
+                            "Preguntas": data['preguntas'], "Enlaces_Int": data['enlaces_internos'],
+                            "Schemas": data['schemas'], "Media": data['media'],
+                            "Readability": data['readability'], "Entidades": data['entidades'],
+                            "DA_Proxy": data['da_proxy'], "TOC": data['toc'],
+                            "full_text": data['full_text'], **data
                         })
                         count_valid += 1
                         progress_bar.progress(count_valid / num_target)
@@ -498,14 +661,10 @@ if analyze_button and keyword:
                 else:
                     st.session_state.data_seo = final_data
                     st.session_state.global_words = global_words
-                    
-                    # CALCULAR GAP ANALYSIS
                     st.session_state.gap_analysis = calcular_gap_analysis(final_data, keyword)
-                    
-                    # REALIZAR CLUSTERING
                     st.session_state.clusters = realizar_clustering(final_data)
-                    
                     status.update(label="✅ Análisis Completado", state="complete")
+                    st.balloons()
 
 # ==========================================
 # 📊 VISUALIZACIÓN DE RESULTADOS
@@ -514,288 +673,158 @@ if st.session_state.data_seo:
     data = st.session_state.data_seo
     df = pd.DataFrame(data)
     
-    # TABS PRINCIPALES
     tab1, tab2, tab3, tab4, tab5 = st.tabs([
-        "📊 Overview", 
+        "📊 Overview General", 
         "🎯 Gap Analysis", 
-        "🧬 Clustering", 
-        "📋 Detalle Competidores",
-        "💾 Exportar"
+        "🧬 Topic Clustering", 
+        "📋 Análisis Detallado",
+        "💾 Exportar Datos"
     ])
     
-    # ==========================================
-    # TAB 1: OVERVIEW
-    # ==========================================
     with tab1:
-        st.subheader("📊 Métricas Clave")
-        
+        st.markdown("### 📊 Métricas Clave del Análisis")
         c1, c2, c3, c4, c5 = st.columns(5)
-        c1.metric("📝 Palabras Promedio", int(df['Palabras'].mean()))
-        c2.metric("🎯 Intención Dominante", df['Intención'].mode()[0] if not df['Intención'].empty else "N/A")
-        c3.metric("🔗 Links Int. Avg", int(df['Enlaces_Int'].mean()))
+        c1.metric("📝 Media Palabras", int(df['Palabras'].mean()))
+        c2.metric("🎯 Intención", df['Intención'].mode()[0] if not df['Intención'].empty else "N/A")
+        c3.metric("🔗 Links Internos", int(df['Enlaces_Int'].mean()))
         c4.metric("🖼️ Media Avg", f"{df['Media'].apply(lambda x: x.get('total', 0)).mean():.1f}")
         c5.metric("📊 DA Promedio", int(df['DA_Proxy'].mean()))
         
-        st.divider()
+        st.markdown("---")
         
-        # Gráfico de Palabras Clave Secundarias
         col1, col2 = st.columns(2)
-        
         with col1:
             st.markdown("#### 🔥 Top Bigramas Semánticos")
             bigrams = get_ngrams(st.session_state.global_words, 2)
             if bigrams:
-                chart_data = pd.DataFrame(
-                    Counter(bigrams).most_common(12), 
-                    columns=['Frase', 'Freq']
-                ).set_index('Frase')
-                st.bar_chart(chart_data, color="#FF4B4B")
+                chart_data = pd.DataFrame(Counter(bigrams).most_common(12), columns=['Frase', 'Freq']).set_index('Frase')
+                st.bar_chart(chart_data, color="#6366f1")
         
         with col2:
-            st.markdown("#### 📈 Distribución de Word Count")
-            st.bar_chart(df[['Pos', 'Palabras']].set_index('Pos'))
+            st.markdown("#### 📈 Distribución Word Count")
+            st.bar_chart(df[['Pos', 'Palabras']].set_index('Pos'), color="#8b5cf6")
         
-        # Schema Markup Analysis
-        st.divider()
-        st.markdown("#### 🏗️ Análisis de Schema Markup")
-        
+        st.markdown("---")
+        st.markdown("#### 🏗️ Análisis Schema Markup")
         schema_stats = {}
         for item in data:
             for schema in item['Schemas']:
                 schema_stats[schema] = schema_stats.get(schema, 0) + 1
-        
         if schema_stats:
-            schema_df = pd.DataFrame(
-                list(schema_stats.items()), 
-                columns=['Schema Type', 'Count']
-            ).sort_values('Count', ascending=False)
+            schema_df = pd.DataFrame(list(schema_stats.items()), columns=['Schema Type', 'Count']).sort_values('Count', ascending=False)
             st.dataframe(schema_df, use_container_width=True)
         else:
-            st.info("No se detectaron schemas en los competidores")
+            st.info("ℹ️ No se detectaron schemas en los competidores")
     
-    # ==========================================
-    # TAB 2: GAP ANALYSIS
-    # ==========================================
     with tab2:
-        st.subheader("🎯 Análisis de Brechas de Contenido")
-        
+        st.markdown("### 🎯 Análisis de Brechas Competitivas")
         if st.session_state.gap_analysis:
             gap = st.session_state.gap_analysis
-            
-            # H2s Críticos
-            st.markdown("### 🔴 H2s Críticos (Aparecen en >50% de competidores)")
+            st.markdown("#### 🔴 H2s Críticos (Aparecen en >50% competidores)")
             if gap['h2s_criticos']:
-                h2_df = pd.DataFrame(
-                    [(h, count) for h, count in gap['h2s_criticos'].items()],
-                    columns=['H2', 'Apariciones']
-                ).sort_values('Apariciones', ascending=False)
-                
+                h2_df = pd.DataFrame([(h, count) for h, count in gap['h2s_criticos'].items()],
+                                    columns=['H2', 'Apariciones']).sort_values('Apariciones', ascending=False)
                 st.dataframe(h2_df, use_container_width=True)
-                
-                st.info("💡 **Recomendación:** Incluye TODOS estos H2s en tu contenido para competir efectivamente")
+                st.success("💡 **Recomendación:** Incluye TODOS estos H2s en tu contenido")
             else:
                 st.warning("No hay H2s que se repitan consistentemente")
             
-            st.divider()
-            
-            # Palabras Clave Secundarias
+            st.markdown("---")
             col1, col2 = st.columns(2)
-            
             with col1:
-                st.markdown("### 📝 Top 15 Palabras Clave Secundarias")
-                words_df = pd.DataFrame(
-                    gap['palabras_clave_secundarias'][:15],
-                    columns=['Palabra', 'Frecuencia']
-                )
+                st.markdown("#### 📝 Top Palabras Clave Secundarias")
+                words_df = pd.DataFrame(gap['palabras_clave_secundarias'][:15], columns=['Palabra', 'Frecuencia'])
                 st.dataframe(words_df, use_container_width=True)
-            
             with col2:
-                st.markdown("### ❓ FAQs Más Comunes")
+                st.markdown("#### ❓ FAQs Más Comunes")
                 if gap['faqs_comunes']:
-                    faq_df = pd.DataFrame(
-                        gap['faqs_comunes'],
-                        columns=['Pregunta', 'Apariciones']
-                    )
+                    faq_df = pd.DataFrame(gap['faqs_comunes'], columns=['Pregunta', 'Apariciones'])
                     st.dataframe(faq_df, use_container_width=True)
                 else:
-                    st.info("No hay FAQs que se repitan")
+                    st.info("Sin FAQs repetidas")
             
-            st.divider()
-            
-            # Benchmarks
-            st.markdown("### 📊 Benchmarks de la Competencia")
-            
+            st.markdown("---")
+            st.markdown("#### 📊 Benchmarks de Competencia")
             bench = gap['coverage_benchmark']
-            
             c1, c2, c3 = st.columns(3)
             c1.metric("📌 H2s Promedio", f"{bench['h2_avg']:.1f}")
             c2.metric("📝 Palabras Promedio", f"{bench['word_avg']:.0f}")
             c3.metric("🖼️ Media Promedio", f"{bench['media_avg']:.1f}")
-            
-            st.success("""
-            **💡 Cómo usar estos datos:**
-            1. Tu contenido debe tener al menos el número promedio de H2s
-            2. Apunta a superar el word count promedio en un 20%
-            3. Incluye más elementos multimedia que el promedio
-            4. Cubre TODOS los H2s críticos identificados arriba
-            """)
     
-    # ==========================================
-    # TAB 3: CLUSTERING
-    # ==========================================
     with tab3:
-        st.subheader("🧬 Clustering por Similitud Semántica")
-        
+        st.markdown("### 🧬 Topic Clustering Semántico")
         if st.session_state.clusters:
             clusters = st.session_state.clusters
-            
-            st.info(f"Se identificaron {len(clusters)} grupos temáticos distintos")
-            
+            st.info(f"📦 Se identificaron {len(clusters)} grupos temáticos distintos")
             for cluster_id, urls in clusters.items():
                 with st.expander(f"📦 Cluster {cluster_id + 1} ({len(urls)} URLs)", expanded=True):
                     for item in urls:
-                        st.markdown(f"- [{item['title'][:70]}...]({item['url']})")
-            
-            st.success("""
-            **💡 Insight Estratégico:**
-            - URLs en el mismo cluster atacan ángulos similares del tema
-            - Identifica qué cluster domina (más URLs) para entender la intención principal
-            - Considera crear contenido que cubra MÚLTIPLES clusters para mayor autoridad
-            """)
+                        st.markdown(f"• [{item['title'][:70]}...]({item['url']})")
         else:
             st.warning("Se necesitan al menos 3 URLs para clustering")
     
-    # ==========================================
-    # TAB 4: DETALLE COMPETIDORES
-    # ==========================================
     with tab4:
-        st.subheader("📋 Análisis Detallado por Competidor")
-        
+        st.markdown("### 📋 Análisis Detallado por Competidor")
         for item in data:
             titulo_corto = (item['Título'][:70] + '..') if len(item['Título']) > 70 else item['Título']
-            
             with st.expander(f"#{item['Pos']} | {titulo_corto}", expanded=False):
-                # Badges superiores
                 c_badges = st.columns(5)
-                
-                # Intención
                 if "Transaccional" in item['Intención']: 
-                    c_badges[0].warning(item['Intención'])
+                    c_badges[0].markdown(f"🛒 {item['Intención']}")
                 else: 
-                    c_badges[0].success(item['Intención'])
-                
-                # Fecha
+                    c_badges[0].markdown(f"📚 {item['Intención']}")
                 if item['Fecha'] != "N/A": 
                     c_badges[1].caption(f"📅 {item['Fecha']}")
-                
-                # DA Proxy
                 da_color = "🟢" if item['DA_Proxy'] >= 60 else "🟡" if item['DA_Proxy'] >= 40 else "🔴"
                 c_badges[2].caption(f"{da_color} DA: {item['DA_Proxy']}")
-                
-                # Readability
                 c_badges[3].caption(f"📖 {item['Readability']}")
-                
-                # TOC
                 if item['TOC']:
                     c_badges[4].caption("✅ TOC")
-                
                 st.caption(f"🔗 {item['URL']}")
                 st.info(f"**Meta:** {item['Meta Desc']}")
-                
-                # Estructura vs Multimedia
                 c1, c2 = st.columns(2)
-                
                 with c1:
-                    st.markdown("#### 🏗️ Estructura de Contenido")
+                    st.markdown("#### 🏗️ Estructura")
                     st.markdown(f"**📊 {item['Palabras']} palabras** | **🎯 {item['Menciones KW']} menciones KW**")
                     st.markdown(f"**🔗 {item['Enlaces_Int']} enlaces internos**")
-                    
                     if item['H1_list']: 
                         st.markdown(f"**H1:** {item['H1_list'][0]}")
-                    
                     if item['H2_list']:
                         st.markdown(f"**H2s ({len(item['H2_list'])}):**")
                         for h in item['H2_list'][:8]: 
                             st.markdown(f"• {h}")
-                    else: 
-                        st.caption("❌ Sin H2s")
-                
                 with c2:
                     st.markdown("#### 🎨 Multimedia & Técnico")
-                    
                     media = item['Media']
                     st.markdown(f"**🖼️ Imágenes:** {media['images']}")
                     st.markdown(f"**🎥 Videos:** {media['videos']}")
-                    st.markdown(f"**📊 Total Media:** {media['total']}")
-                    
                     if item['Schemas']:
                         st.markdown(f"**🏗️ Schemas:** {', '.join(item['Schemas'])}")
-                    else:
-                        st.caption("❌ Sin Schema Markup")
-                    
                     if item['Entidades']:
                         st.markdown(f"**🏷️ Entidades:** {', '.join(item['Entidades'][:5])}")
-                
-                # FAQs
-                st.markdown("#### ❓ FAQs Detectadas")
+                st.markdown("#### ❓ FAQs")
                 if item['Preguntas']:
                     faq_text = "\n".join([f"- {p}" for p in item['Preguntas']])
                     st.code(faq_text, language="text")
-                else:
-                    st.caption("Sin preguntas detectadas")
-                
-                # Muestra de contenido
-                with st.expander("📄 Ver muestra de contenido"):
-                    st.text_area("", value=item['Contenido'], height=150, label_visibility="collapsed")
     
-    # ==========================================
-    # TAB 5: EXPORTAR
-    # ==========================================
     with tab5:
-        st.subheader("💾 Exportar Análisis")
-        
-        # Preparar CSV
-        export_df = df[[
-            'Pos', 'URL', 'Título', 'Fecha', 'Palabras', 'Menciones KW',
-            'Intención', 'Enlaces_Int', 'DA_Proxy', 'Readability', 'TOC'
-        ]].copy()
-        
+        st.markdown("### 💾 Exportar Análisis")
+        export_df = df[['Pos', 'URL', 'Título', 'Fecha', 'Palabras', 'Menciones KW',
+                        'Intención', 'Enlaces_Int', 'DA_Proxy', 'Readability', 'TOC']].copy()
         export_df['Schemas'] = df['Schemas'].apply(lambda x: ', '.join(x) if x else 'None')
         export_df['Media_Total'] = df['Media'].apply(lambda x: x.get('total', 0))
-        
         csv = export_df.to_csv(index=False).encode('utf-8')
-        
-        st.download_button(
-            "📥 Descargar Análisis Completo (CSV)",
-            csv,
-            f"SERP_XRAY_Ultra_{keyword.replace(' ', '_')}.csv",
-            "text/csv",
-            type="primary",
-            use_container_width=True
-        )
-        
-        # Exportar Gap Analysis
-        if st.session_state.gap_analysis:
-            gap = st.session_state.gap_analysis
-            
-            gap_text = "=== H2S CRÍTICOS ===\n"
-            gap_text += "\n".join([f"- {h} ({c} veces)" for h, c in gap['h2s_criticos'].items()])
-            gap_text += "\n\n=== PALABRAS CLAVE SECUNDARIAS ===\n"
-            gap_text += "\n".join([f"- {w} ({c} veces)" for w, c in gap['palabras_clave_secundarias'][:30]])
-            
-            st.download_button(
-                "📥 Descargar Gap Analysis (TXT)",
-                gap_text.encode('utf-8'),
-                f"Gap_Analysis_{keyword.replace(' ', '_')}.txt",
-                "text/plain",
-                use_container_width=True
-            )
-        
-        st.success("✅ Análisis listo para exportar")
+        st.download_button("📥 Descargar Análisis CSV", csv, 
+                          f"SERP_Analysis_{keyword.replace(' ', '_')}.csv",
+                          "text/csv", type="primary", use_container_width=True)
 
 # ==========================================
 # 🎯 FOOTER
 # ==========================================
-st.divider()
-st.caption("🚀 SERP X-RAY 360™ ULTRA - Versión 12.0 | Powered by Agencia Homia")
-st.caption("Módulos activos: Gap Analysis, Clustering, Schema Detection, Media Analysis, Readability, NER, DA Proxy, TOC Detection")
+st.markdown("---")
+st.markdown("""
+<div style='text-align: center; padding: 2rem 0; color: #94a3b8;'>
+    <p style='margin: 0; font-size: 0.875rem;'><strong>SERP X-RAY 360™ PRO</strong> v12.0 | Professional Edition</p>
+    <p style='margin: 0.5rem 0 0 0; font-size: 0.75rem;'>Powered by Advanced SERP Intelligence © 2024</p>
+</div>
+""", unsafe_allow_html=True)
