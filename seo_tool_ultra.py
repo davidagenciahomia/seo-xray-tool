@@ -585,6 +585,120 @@ def analyze_url_final(url, target_kw, snippet_serp):
     except Exception as e:
         return {"error": str(e)}
 
+def calcular_competitor_score(item, benchmarks):
+    """
+    Calcula un score 0-100 para cada competidor basado en múltiples factores
+    """
+    scores = {}
+    
+    # 1. Word Count Score (20 puntos)
+    word_count = item.get('Palabras', 0)
+    word_benchmark = benchmarks['word_avg']
+    if word_count >= word_benchmark * 1.2:
+        scores['words'] = 20
+    elif word_count >= word_benchmark:
+        scores['words'] = 15
+    elif word_count >= word_benchmark * 0.8:
+        scores['words'] = 10
+    else:
+        scores['words'] = 5
+    
+    # 2. H2 Structure Score (15 puntos)
+    h2_count = len(item.get('H2_list', item.get('h2', [])))
+    h2_benchmark = benchmarks['h2_avg']
+    if h2_count >= h2_benchmark * 1.2:
+        scores['h2s'] = 15
+    elif h2_count >= h2_benchmark:
+        scores['h2s'] = 12
+    elif h2_count >= h2_benchmark * 0.8:
+        scores['h2s'] = 8
+    else:
+        scores['h2s'] = 4
+    
+    # 3. Internal Links Score (15 puntos)
+    enlaces = item.get('Enlaces', item.get('enlaces', {}))
+    internal = enlaces.get('internal', 0) if isinstance(enlaces, dict) else 0
+    internal_benchmark = benchmarks.get('internal_links_avg', 20)
+    if internal >= internal_benchmark * 1.2:
+        scores['internal_links'] = 15
+    elif internal >= internal_benchmark:
+        scores['internal_links'] = 12
+    elif internal >= internal_benchmark * 0.8:
+        scores['internal_links'] = 8
+    else:
+        scores['internal_links'] = 4
+    
+    # 4. External Links Score (10 puntos)
+    external = enlaces.get('external', 0) if isinstance(enlaces, dict) else 0
+    external_benchmark = benchmarks.get('external_links_avg', 5)
+    if external >= external_benchmark:
+        scores['external_links'] = 10
+    elif external >= external_benchmark * 0.7:
+        scores['external_links'] = 7
+    else:
+        scores['external_links'] = 4
+    
+    # 5. Media Richness Score (10 puntos)
+    media = item.get('Media', item.get('media', {}))
+    media_total = media.get('total', 0) if isinstance(media, dict) else 0
+    media_benchmark = benchmarks['media_avg']
+    if media_total >= media_benchmark * 1.2:
+        scores['media'] = 10
+    elif media_total >= media_benchmark:
+        scores['media'] = 8
+    elif media_total >= media_benchmark * 0.8:
+        scores['media'] = 5
+    else:
+        scores['media'] = 3
+    
+    # 6. Domain Authority Score (15 puntos)
+    da = item.get('DA_Proxy', 0)
+    if da >= 70:
+        scores['da'] = 15
+    elif da >= 50:
+        scores['da'] = 12
+    elif da >= 30:
+        scores['da'] = 8
+    else:
+        scores['da'] = 5
+    
+    # 7. SEO On-Page Score (10 puntos)
+    seo = item.get('SEO_Onpage', item.get('seo_onpage', {}))
+    if isinstance(seo, dict):
+        seo_points = 0
+        if seo.get('kw_in_title'): seo_points += 3
+        if seo.get('kw_in_meta'): seo_points += 2
+        if seo.get('kw_in_h1'): seo_points += 3
+        if seo.get('kw_in_strong'): seo_points += 2
+        scores['seo_onpage'] = seo_points
+    else:
+        scores['seo_onpage'] = 0
+    
+    # 8. Schema Markup Score (5 puntos)
+    schemas = item.get('Schemas', item.get('schemas', []))
+    if isinstance(schemas, list) and len(schemas) > 0:
+        scores['schema'] = 5
+    else:
+        scores['schema'] = 0
+    
+    # Score total
+    total_score = sum(scores.values())
+    
+    return {
+        'total': total_score,
+        'breakdown': scores,
+        'grade': 'A' if total_score >= 85 else 'B' if total_score >= 70 else 'C' if total_score >= 50 else 'D'
+    }
+
+def get_score_color(score):
+    """Retorna color según score"""
+    if score >= 85:
+        return "🟢", "#10b981"
+    elif score >= 70:
+        return "🟡", "#f59e0b"
+    else:
+        return "🔴", "#ef4444"
+
 def calcular_gap_analysis(data_list, keyword):
     all_h2s = []
     for item in data_list:
@@ -793,6 +907,161 @@ if st.session_state.data_seo:
         if st.session_state.show_help:
             with c5:
                 show_explainer("da_proxy")
+        
+        st.markdown("---")
+        
+        # COMPETITOR SCORE CARD
+        st.markdown("### 🏆 Competitor Score Card: ¿Quién está ganando?")
+        
+        if st.session_state.show_help:
+            st.markdown("""
+            <div class="explainer-box">
+                <strong>💡 ¿Qué es el Score Card?</strong><br>
+                Un sistema de puntuación 0-100 que evalúa cada competidor en 8 factores clave.<br><br>
+                <strong>Puntuación:</strong><br>
+                • 🟢 85-100: Excelente (Grado A)<br>
+                • 🟡 70-84: Bueno (Grado B)<br>
+                • 🟠 50-69: Regular (Grado C)<br>
+                • 🔴 0-49: Pobre (Grado D)<br><br>
+                <strong>¿Para qué sirve?</strong> Identificar al instante quién es tu MAYOR competidor y por qué.
+            </div>
+            """, unsafe_allow_html=True)
+        
+        # Calcular scores si gap_analysis existe
+        if st.session_state.gap_analysis:
+            benchmarks = st.session_state.gap_analysis['coverage_benchmark']
+            
+            # Calcular score para cada competidor
+            for item in data:
+                item['score_data'] = calcular_competitor_score(item, benchmarks)
+            
+            # Ordenar por score
+            data_sorted = sorted(data, key=lambda x: x['score_data']['total'], reverse=True)
+            
+            # Crear DataFrame para visualización
+            score_rows = []
+            for item in data_sorted[:10]:  # Top 10
+                score = item['score_data']
+                emoji, color = get_score_color(score['total'])
+                
+                score_rows.append({
+                    'Pos': f"#{item['Pos']}",
+                    'Score': score['total'],
+                    'Grade': score['grade'],
+                    '📝 Palabras': score['breakdown']['words'],
+                    '📑 H2s': score['breakdown']['h2s'],
+                    '🔗 Links Int': score['breakdown']['internal_links'],
+                    '🌐 Links Ext': score['breakdown']['external_links'],
+                    '🖼️ Media': score['breakdown']['media'],
+                    '📊 DA': score['breakdown']['da'],
+                    '✅ SEO': score['breakdown']['seo_onpage'],
+                    '🏗️ Schema': score['breakdown']['schema'],
+                    'Título': item['Título'][:50] + '...' if len(item['Título']) > 50 else item['Título']
+                })
+            
+            score_df = pd.DataFrame(score_rows)
+            
+            # Mostrar top 3
+            col1, col2, col3 = st.columns(3)
+            
+            if len(data_sorted) >= 1:
+                top1 = data_sorted[0]
+                score1 = top1['score_data']
+                emoji1, _ = get_score_color(score1['total'])
+                with col1:
+                    st.markdown(f"""
+                    <div style='background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 215, 0, 0.1)); 
+                                border: 2px solid #ffd700; border-radius: 12px; padding: 1.5rem; text-align: center;'>
+                        <div style='font-size: 3rem;'>🥇</div>
+                        <h3 style='margin: 0.5rem 0; color: #ffd700;'>LÍDER</h3>
+                        <p style='font-size: 0.875rem; color: #94a3b8; margin: 0;'>Posición #{top1['Pos']}</p>
+                        <div style='font-size: 2.5rem; font-weight: 800; margin: 1rem 0;'>{emoji1} {score1['total']}</div>
+                        <div style='background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 8px; font-size: 0.75rem;'>
+                            Grado {score1['grade']}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            if len(data_sorted) >= 2:
+                top2 = data_sorted[1]
+                score2 = top2['score_data']
+                emoji2, _ = get_score_color(score2['total'])
+                with col2:
+                    st.markdown(f"""
+                    <div style='background: linear-gradient(135deg, rgba(192, 192, 192, 0.2), rgba(192, 192, 192, 0.1)); 
+                                border: 2px solid #c0c0c0; border-radius: 12px; padding: 1.5rem; text-align: center;'>
+                        <div style='font-size: 3rem;'>🥈</div>
+                        <h3 style='margin: 0.5rem 0; color: #c0c0c0;'>2º LUGAR</h3>
+                        <p style='font-size: 0.875rem; color: #94a3b8; margin: 0;'>Posición #{top2['Pos']}</p>
+                        <div style='font-size: 2.5rem; font-weight: 800; margin: 1rem 0;'>{emoji2} {score2['total']}</div>
+                        <div style='background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 8px; font-size: 0.75rem;'>
+                            Grado {score2['grade']}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            if len(data_sorted) >= 3:
+                top3 = data_sorted[2]
+                score3 = top3['score_data']
+                emoji3, _ = get_score_color(score3['total'])
+                with col3:
+                    st.markdown(f"""
+                    <div style='background: linear-gradient(135deg, rgba(205, 127, 50, 0.2), rgba(205, 127, 50, 0.1)); 
+                                border: 2px solid #cd7f32; border-radius: 12px; padding: 1.5rem; text-align: center;'>
+                        <div style='font-size: 3rem;'>🥉</div>
+                        <h3 style='margin: 0.5rem 0; color: #cd7f32;'>3º LUGAR</h3>
+                        <p style='font-size: 0.875rem; color: #94a3b8; margin: 0;'>Posición #{top3['Pos']}</p>
+                        <div style='font-size: 2.5rem; font-weight: 800; margin: 1rem 0;'>{emoji3} {score3['total']}</div>
+                        <div style='background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 8px; font-size: 0.75rem;'>
+                            Grado {score3['grade']}
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            
+            st.markdown("---")
+            
+            # Tabla completa de scores
+            st.markdown("#### 📊 Tabla Completa de Puntuaciones")
+            
+            # Aplicar estilos a la tabla
+            def highlight_score(val):
+                if isinstance(val, (int, float)):
+                    if val >= 15:
+                        return 'background-color: rgba(16, 185, 129, 0.2); color: #10b981; font-weight: bold;'
+                    elif val >= 10:
+                        return 'background-color: rgba(245, 158, 11, 0.2); color: #f59e0b; font-weight: bold;'
+                    else:
+                        return 'background-color: rgba(239, 68, 68, 0.2); color: #ef4444; font-weight: bold;'
+                return ''
+            
+            # Mostrar solo columnas relevantes
+            display_cols = ['Pos', 'Score', 'Grade', 'Título']
+            st.dataframe(
+                score_df[display_cols],
+                use_container_width=True,
+                height=400
+            )
+            
+            # Botón para ver desglose detallado
+            with st.expander("🔍 Ver Desglose Detallado de Puntuaciones"):
+                st.dataframe(
+                    score_df,
+                    use_container_width=True,
+                    height=400
+                )
+                
+                st.markdown("""
+                **Leyenda de puntuaciones máximas:**
+                - 📝 Palabras: 20 puntos
+                - 📑 H2s: 15 puntos
+                - 🔗 Links Internos: 15 puntos
+                - 🌐 Links Externos: 10 puntos
+                - 🖼️ Media: 10 puntos
+                - 📊 Domain Authority: 15 puntos
+                - ✅ SEO On-Page: 10 puntos
+                - 🏗️ Schema: 5 puntos
+                - **TOTAL: 100 puntos**
+                """)
         
         st.markdown("---")
         
